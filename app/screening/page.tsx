@@ -110,9 +110,9 @@ export default function ScreeningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <div className="rounded-2xl p-6 sm:p-8">
           <ProgressBar currentStep={step} totalSteps={totalSteps} />
 
           <div className="min-h-[280px]">

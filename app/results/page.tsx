@@ -19,7 +19,7 @@ export default function ResultsPage() {
 
   if (!result) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-500">Loading...</p>
       </div>
     );
@@ -28,9 +28,9 @@ export default function ResultsPage() {
   const isEligible = result.status === "eligible";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 py-8 sm:py-12">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8">
+        <div className="rounded-2xl p-6 sm:p-8">
           {/* Status Banner */}
           <div
             className={`rounded-xl p-6 mb-8 ${
