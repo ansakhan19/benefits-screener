@@ -35,10 +35,11 @@ export async function POST(request: NextRequest) {
       { headers: corsHeaders(origin) }
     );
   } catch (error) {
-    console.error("Screening API error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Screening API error:", message);
     return NextResponse.json(
       {
-        error: "Failed to screen eligibility",
+        error: message,
         eligiblePrograms: [],
       },
       { status: 502, headers: corsHeaders(origin) }
