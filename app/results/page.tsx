@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { EligibilityResult } from "@/lib/types";
+
+type EmailStatus = "idle" | "submitting" | "success" | "error";
 
 export default function ResultsPage() {
   const router = useRouter();
   const [result, setResult] = useState<EligibilityResult | null>(null);
+  const [email, setEmail] = useState("");
+  const [emailStatus, setEmailStatus] = useState<EmailStatus>("idle");
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("screeningResult");
@@ -16,6 +21,33 @@ export default function ResultsPage() {
       router.push("/");
     }
   }, [router]);
+
+  async function handleSendChecklist(e: FormEvent) {
+    e.preventDefault();
+    if (!email || !result) return;
+
+    setEmailStatus("submitting");
+    setEmailError("");
+
+    try {
+      const res = await fetch("/api/send-checklist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, result }),
+      });
+
+      if (res.ok) {
+        setEmailStatus("success");
+      } else {
+        const data = await res.json();
+        setEmailError(data.error || "Failed to send. Please try again.");
+        setEmailStatus("error");
+      }
+    } catch {
+      setEmailError("Something went wrong. Please try again.");
+      setEmailStatus("error");
+    }
+  }
 
   if (!result) {
     return (
@@ -63,6 +95,56 @@ export default function ResultsPage() {
               </div>
             </div>
           </div>
+
+          {/* Email Capture — eligible users only */}
+          {isEligible && (
+            <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6 mb-8">
+              {emailStatus === "success" ? (
+                <div className="text-center">
+                  <p className="text-indigo-800 font-semibold text-lg">
+                    Check your inbox!
+                  </p>
+                  <p className="text-indigo-700 text-sm mt-1">
+                    We sent your personalized enrollment checklist to{" "}
+                    <strong>{email}</strong>.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-lg font-bold text-indigo-900 mb-1">
+                    Not ready to enroll right now?
+                  </h2>
+                  <p className="text-indigo-700 text-sm mb-4">
+                    We&apos;ll email you a personalized checklist with everything you
+                    need to complete your enrollment later.
+                  </p>
+                  <form onSubmit={handleSendChecklist} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      required
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      disabled={emailStatus === "submitting"}
+                      className="flex-1 border border-indigo-300 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-60"
+                    />
+                    <button
+                      type="submit"
+                      disabled={emailStatus === "submitting"}
+                      className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-indigo-400 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {emailStatus === "submitting"
+                        ? "Sending..."
+                        : "Send My Checklist"}
+                    </button>
+                  </form>
+                  {emailStatus === "error" && (
+                    <p className="text-red-600 text-sm mt-2">{emailError}</p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Eligible: Next Steps */}
           {isEligible && (
