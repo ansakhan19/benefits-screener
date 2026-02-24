@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { error } = await getResend().emails.send({
-      from: "Fair Fares Screener <onboarding@resend.dev>",
+      from: "Fair Fares Screener <support@contactqualift.com>",
       to: email,
       subject: "Your Fair Fares NYC Enrollment Checklist",
       html: buildEmailHtml(result),
